@@ -1,0 +1,153 @@
+---
+title: "Final Project"
+author: "Reisha Rhodenbaugh"
+date: "July 30, 2023"
+output:
+  word_document: default
+  pdf_document:
+    latex_engine: xelatex
+    dev: cairo_pdf
+  html_document:
+    fig_caption: yes
+---
+
+# Executive summary
+
+For this project, I wanted to compare movie and tv show data on the Disney+ streaming service, and see how much tv show and movie uploads have changed over time on Disney +. As expected, tv show and movie releases are higher in modern times since the turn of the millenia. The figures also show that movies have been released more than tv shows on Disney+. Regarding maturity ratings, G & PG ratings are most common among tv shows and movies. And regarding the themes of the releases, themes like "family", "friends", "team", life", "adventure" and "world" are common among tv shows and movies. Specific to tv shows, themes like "animals", "school" & "heroes" are more common, while themes like "home", "boy", "christmas" and "love" are more commonly used to describe Disney+ movies.
+
+
+# Data background
+
+Disney+ is a very popular streaming subscription service for movies, televesion and video content. I downloaded this [Disney+ movies and tv shows dataset](https://www.kaggle.com/datasets/shivamb/disney-movies-and-tv-shows?select=disney_plus_titles.csv) from kaggle.com. This dataset contains information about the names, release year, ratings, country of origin and number of seasons/duration of tv shows & movies on Disney+.
+
+# Data cleaning
+
+This dataset was already very clean and organized, but I created some subsets of the dataset for some plots as shown below.
+
+```{r load-libraries, message=FALSE, warning=FALSE}
+# Load libraries
+library(tidyverse)
+library(scales)
+library(tidytext)
+
+# Read in csv data file
+disney_plus_titles <- read_csv("data/disney_plus_titles.csv")
+
+```
+
+# Individual figures
+
+## Figure 1
+
+This first figure gives an overview of the total number of tv shows & movies released on Disney+ in the form of a column chart. I chose a light purple color as the color for this chart, and then used the Adobe Color website to determine other complimentary colors to use for the rest of the figures. 
+
+
+```{r figure-1, message=FALSE, warning=FALSE, fig.width=10}
+# Total number released by year
+by_year <- disney_plus_titles %>% 
+  group_by(release_year) %>% 
+  summarize(total = n()) %>% 
+  mutate(total)
+
+# Column Plot 
+p1 <- ggplot(data = by_year,
+       mapping = aes(x = release_year,
+                     y = total)) +
+  geom_col(fill = "#CF9FFF") +
+  guides(fill = FALSE) +
+  labs(x = "Release Year",
+   y = "Total Number Released",
+   title = "Total Disney Plus Titles Released by Year") +
+  theme_minimal() + 
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.title = element_text(face = "bold"))
+
+ggsave(p1, filename = "output/totalreleases.pdf",
+       width = 7, height = 4)
+
+ggsave(p1, filename = "output/totalreleases.png",
+       width = 7, height = 4)
+```
+
+
+
+
+## Figure 2
+
+This second figure is similar to the first chart, but facets based on type of media (tv show or movie) and is a histogram.
+
+```{r figure-2, message=FALSE, warning=FALSE}
+# Histogram Plot 
+p2 <- ggplot(data = disney_plus_titles,
+       mapping = aes(x = release_year)) +
+  geom_histogram(color = "white", fill = "#66B37F") +
+  labs(x = "Release Year",
+   y = "Total Number Released",
+   title = "Disney Plus Titles Released by Year & Type") +
+  facet_wrap(vars(type)) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = "none",
+        plot.title = element_text(face = "bold"))
+
+ggsave(p2, filename = "output/releasesbytype.pdf",
+       width = 7, height = 4)
+
+ggsave(p2, filename = "output/releasesbytype.png",
+       width = 7, height = 4)
+        
+```
+
+
+## Figure 3
+
+This third figure filters out the most commonly used words in the description for each movie and tv show. The code removes filler words and other words that don't show themes of the movies/tv shows.
+
+```{r figure-3, message=FALSE, warning=FALSE}
+
+disney_words <- disney_plus_titles %>%
+  # Get rid of rows where text is missing
+  drop_na(description) %>% 
+  # To count words correctly, giving each word its own row (since based on lines of text)   
+  unnest_tokens(word, description) 
+
+head(disney_words)
+
+
+(top_words_disney <- disney_words %>% 
+  # Remove stop words
+  anti_join(stop_words) %>% 
+  # Remove other words
+  filter(!(word %in% c("disney", "series", "details"))) %>% 
+  # Count all the words
+  count(type, word, sort = TRUE) %>% 
+  # Show the top 15 words
+  group_by(type) %>% 
+  top_n(15) %>% 
+  ungroup() %>% 
+  # Make the words an ordered factor so they plot in order
+  mutate(word = fct_inorder(word)))
+
+# Make plot of top 15 words
+p3 <- ggplot(top_words_disney, 
+       aes(x = n, y = fct_rev(word), fill = type)) + 
+  geom_col(fill = "#885DB3") +
+  facet_wrap(vars(type), scales = "free_y") +
+  theme_minimal() +
+  theme(legend.position="none",
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        plot.title = element_text(face = "bold")) +
+  labs(x = "Word Count",
+       y = NULL,
+       title = "Fifteen Most Frequent Words Used in TV/Movie Descriptions")
+
+ggsave(p3, filename = "output/words.pdf",
+       width = 7, height = 4)
+
+ggsave(p3, filename = "output/words.png",
+       width = 7, height = 4)
+
+```
