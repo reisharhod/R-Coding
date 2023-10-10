@@ -1,0 +1,111 @@
+---
+title: "NYC Rat Sightings Project"
+author: "Reisha Rhodenbaugh"
+date: "7/4/23"
+output:
+  word_document: default
+  html_document: default
+---
+
+# Memo Discussion
+For this project I use R {ggplot2} to tell an interesting story hidden in data about rat sightings in New York City for a class project. I downloaded the [NYC rat sighting data] (https://www.kaggle.com/datasets/new-york-city/nyc-rat-sightings/data) from Kaggle. 
+
+My class professor provided an unhelpful version of a graphic to edit for this project to create a new story. The original graphic I'm editing is a column chart comparing the number of rat sightings to the location type, for the years 2014-2017. Previously it was all grayscale, and not eye-catching. The columns were washed out with the amount of grayscale present, and the gray background theme was also contributing to this effect. The y-axis labels were also overcrowded.
+Now, in the new graphic, here's what I notice specific to the principles of design:
+
+•	CONTRAST: The added colors help make the graphs easier to read & the colors add more contrast so the graph isn't washed out with full grayscale. I also changed the theme of the graph to black & white which gives it a cleaner look. Lastly, I changed the column chart to a lollipop chart, to better emphasize the end of each bar. 
+•	REPETITION: The axis lables and title communicate the same message regarding what the graphs are displaying.
+•	ALIGMENT: The spacing of the graphs was already okay, with the y-axis labels being aligned to the right. Now there is a title and subtitle to add some more information & alignment that adds more dimension to the graph.
+•	PROXIMITY: I changed the size of the graphs so that the axis wording isn't so crowded anymore. Also, I used scales = "free_x" to allow the x range of each facet graph to vary, so that the data for each year can be better tailored & seen. 
+
+The story my new graphic more clearly tells is that 3+ Family Apt Buildings have had the most rat sightings from 2014-2017 compared to other location types. We can also see that the next common locations for rat sightings during these years included 1-2 Family Dwellings and other locations not specified. 
+
+Regarding, Kieran Healy’s principles of great visualizations, changing the column chart to a lollipop chart helps decrease perceptual issues that can come with a column/bar graphic and this also allows for good judgment in reading the new graphic. The new graph has better aesthetics than before and the content of the graphic doesn't include any substantive problems.
+
+# Clean Up the Data
+
+```{r}
+# Load libraries
+library(tidyverse)
+library(lubridate)
+
+# Load NYC rat sighting dataset
+rats_raw <- read_csv("data/Rat_Sightings.csv", na = c("", "NA", "N/A"))
+
+# Clean and prepare the data
+rats_clean <- rats_raw %>%
+  rename(created_date = `Created Date`,
+         location_type = `Location Type`,
+         borough = Borough) %>%
+  mutate(created_date = mdy_hm(created_date)) %>%
+  mutate(sighting_year = year(created_date),
+         sighting_month = month(created_date),
+         sighting_day = day(created_date),
+         sighting_weekday = wday(created_date, label = TRUE, abbr = FALSE)) %>%
+  filter(borough != "Unspecified")
+  
+  
+```
+
+# Summarize the Data
+
+```{r}
+# See the count of rat sightings by weekday
+rats_clean %>%
+  count(sighting_weekday)
+
+# Assign a summarized data frame to an object to use it in a plot
+rats_by_weekday <- rats_clean %>%
+  count(sighting_weekday, sighting_year)
+
+ggplot(rats_by_weekday, aes(y = fct_rev(sighting_weekday), x = n)) + 
+  geom_col() +
+  facet_wrap(vars(sighting_year))
+
+# See the count of rat sightings by weekday and borough
+rats_clean %>%
+  count(sighting_weekday, borough, sighting_year)
+
+
+```
+
+
+
+# Create a Visualization
+
+```{r plot-wider, fig.width=10, fig.height=10}
+# Create a new data subset to use for graphing
+rats_by_count <- rats_clean %>%
+  filter(sighting_year >= 2014) %>%
+  arrange(desc(location_type)) %>%
+  count(location_type, sighting_year)
+
+# Create the Graph
+(mp1plot <- rats_by_count %>%
+  group_by(location_type, sighting_year) %>%
+  ggplot() +
+    geom_pointrange(mapping = aes(x = n, y = location_type, xmin = 0, xmax = n, color = location_type)) +
+    facet_wrap(~sighting_year, scales = "free_x") + 
+  labs(
+    x = "Number of Rat Sightings",
+    y = "Type of Location",
+    title = "Number of Rat Sightings by Location Type & Year in New York",
+    subtitle = "A Lollipop Chart of Sightings, Location & Year"
+  ) +
+    theme_bw() +
+  theme(legend.position = "bottom",
+        plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "italic"),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold")))
+
+```
+
+# Output the Graphic as PNG & PDF files
+
+```{r}
+ggsave(mp1plot, filename = "output/miniproject1graphic.png", width = 12, height = 10)
+
+ggsave(mp1plot, filename = "output/miniproject1graphic.pdf", width = 12, height = 10)
+```
+
