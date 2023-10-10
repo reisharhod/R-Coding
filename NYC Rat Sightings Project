@@ -8,6 +8,7 @@ output:
 ---
 
 # Memo Discussion
+
 For this project I use R {ggplot2} to tell an interesting story hidden in data about rat sightings in New York City for a class project. I downloaded the [NYC rat sighting data] (https://www.kaggle.com/datasets/new-york-city/nyc-rat-sightings/data) from Kaggle. 
 
 My class professor provided an unhelpful version of a graphic to edit for this project to create a new story. The original graphic I'm editing is a column chart comparing the number of rat sightings to the location type, for the years 2014-2017. Previously it was all grayscale, and not eye-catching. The columns were washed out with the amount of grayscale present, and the gray background theme was also contributing to this effect. The y-axis labels were also overcrowded.
