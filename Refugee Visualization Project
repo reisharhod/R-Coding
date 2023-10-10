@@ -1,5 +1,5 @@
 ---
-title: "Mini Project 2"
+title: "Refugee Visualization Project"
 author: "Reisha Rhodenbaugh"
 date: "2023-07-17"
 output:
@@ -9,9 +9,12 @@ output:
 
 # Memo Discussion
 
-With this heatmap graphic, we see that out of all continents, Asia had the most refugees admitted to the U.S. nearly every year from 2006 to 2015. We also see that 2009 was an interesting year as that year the peak number of refugees came to the U.S. from Asia. Also, Europe and the Americas had the lowest number of refugees throughout this time frame, and Africa had the second highest amount of refugees admitted to the U.S., but again, Asia had the highest amount across all years except for 2006. 
+For this project, I explore data from the U.S. Department of Homeland Security’s annual count of people granted refugee status between 2006-2015. [This dataset] (https://www.kaggle.com/datasets/dhs/refugee-report) can be downloaded from Kaggle.
+I created a time-based visualization (heatmap) to find a story in the data.
 
-Regarding the principles of CRAP:
+The heatmap graphic shows that out of all continents, Asia had the most refugees admitted to the U.S. nearly every year from 2006 to 2015. We also see that 2009 was an interesting year as that year the peak number of refugees came to the U.S. from Asia. Also, Europe and the Americas had the lowest number of refugees throughout this time frame, and Africa had the second highest amount of refugees admitted to the U.S., but again, Asia had the highest amount across all years except for 2006. 
+
+Next, assessing the heatmap graphic according to the principles of design:
 CONTRAST: I removed the grid lines and gray background to allow the heatmap to be more distinguished with a white background. Also, the title is bolded to help add contrast to the words. The viridis plasma color palette helps add contrast as well, that is appealing for color-blind users as well. 
 
 REPETITION: The sans font is used throughout and the subtitle helps affirm that one focus of this graphic is the time period across 2006 to 2015. 
@@ -71,7 +74,7 @@ refugees_clean <- refugees_raw %>%
   mutate(cumulative_total = cumsum(total)))
 ```
 
-# Create a Time-Based Visualization (Intermediate Graphic)
+# Create a Time-Based Visualization
 
 ```{r create-intermediate-graphic, fig.width=10, fig.higth=10, message=FALSE, warning=FALSE}
 
@@ -94,9 +97,6 @@ refugees_clean <- refugees_raw %>%
        title = "Total Number of Refugees Admitted to the US by Continent",
        subtitle = "2006 - 2015",
        caption = "Source: Deparment of Homeland Security"))
-
-
-
 
 ```
 
